@@ -82,14 +82,15 @@ function Dashboard({ onLogout }) {
   const [logs, setLogs] = useState([]);
   const [logsSearch, setLogsSearch] = useState('');
 
-  // Auto-Simulation effect for Chat
-  const chatIntervalRef = useRef(null);
+
 
   // Load current user from localStorage
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (user) {
-      setCurrentUser(JSON.parse(user));
+      const parsed = JSON.parse(user);
+      setCurrentUser(parsed);
+      setChatUser(parsed.name || parsed.email || 'You');
     }
   }, []);
 
@@ -169,50 +170,8 @@ function Dashboard({ onLogout }) {
     }
   }, [chatMessages, activeTab]);
 
-  // Simulated active chat session
-  useEffect(() => {
-    const simulatedPhrases = [
-      { sender: 'Bob', text: 'This is a waste of time, you guys are clueless.' },
-      { sender: 'Rahul', text: 'Tum bilkul pagal ho kya? Dimaag nahi hai?' },
-      { sender: 'Alice', text: 'Please respect each other. We are here to learn!' },
-      { sender: 'Priya', text: 'I am so excited to see the project presentations!' },
-      { sender: 'Vikram', text: 'Bhagwan ke naam pe dhong band karo tum log.' },
-      { sender: 'Sam', text: 'Go crawl into a hole and never post again.' },
-      { sender: 'Sneha', text: 'Ladkiyon ko coding nahi aati, stay in the kitchen.' },
-      { sender: 'Rahul', text: 'I will find where you live and beat you up.' },
-      { sender: 'Alice', text: 'Does anyone need help setting up the node backend?' },
-      { sender: 'Priya', text: 'Yes, please share the git repo links.' }
-    ];
 
-    if (activeTab === 'chat' && apiOnline) {
-      // Simulate a new message every 12 seconds
-      chatIntervalRef.current = setInterval(async () => {
-        const randomIndex = Math.floor(Math.random() * simulatedPhrases.length);
-        const phrase = simulatedPhrases[randomIndex];
-        try {
-          await fetch(`${API_BASE_URL}/api/chat/message`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(phrase)
-          });
-          fetchChatMessages();
-          fetchDashboardData(); // Update stats in background
-        } catch (e) {
-          console.error(e);
-        }
-      }, 12000);
-    } else {
-      if (chatIntervalRef.current) {
-        clearInterval(chatIntervalRef.current);
-      }
-    }
 
-    return () => {
-      if (chatIntervalRef.current) {
-        clearInterval(chatIntervalRef.current);
-      }
-    };
-  }, [activeTab, apiOnline]);
 
   // 2. Event Handlers
   const handleAnalyze = async (e) => {
